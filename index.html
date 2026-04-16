@@ -481,7 +481,7 @@
   <div class="screen active" id="screen1">
     <div class="card">
       <div class="card-title">📏 まず、BMIを確認しましょう</div>
-      <div class="card-sub">身長と体重を入力するだけ。<br>問診ではなく、処方の目安確認です。</div>
+      <div class="card-sub">身長と体重を入れるだけ。<br>30秒で終わります。</div>
 
       <div class="field-group">
         <div class="field-label"><span class="icon">📐</span>身長</div>
@@ -505,8 +505,8 @@
 
     <div class="trust-row">
       <div class="trust-item"><span class="ti">🔒</span>情報は安全に管理</div>
-      <div class="trust-item"><span class="ti">⏱️</span>約1分で完了</div>
-      <div class="trust-item"><span class="ti">💊</span>処方実績多数</div>
+      <div class="trust-item"><span class="ti">⏱️</span>30秒で完了</div>
+      <div class="trust-item"><span class="ti">🆓</span>登録不要・無料で確認</div>
     </div>
   </div>
 
@@ -533,7 +533,7 @@
 
     <div class="card">
       <div class="card-title">マンジャロ処方目安について</div>
-      <div class="card-sub">日本肥満学会のガイドラインに基づく目安です。<br>BMI 25以上、または BMI 23以上で高血圧・高脂血症などの合併症がある方が対象です。</div>
+      <div class="card-sub">BMI 25以上が目安です。BMIが低くても、体型や体質によっては処方できる場合があります。</div>
       <button class="btn-primary" onclick="goStep(3)">
         次のステップへ <span class="btn-arrow">→</span>
       </button>
@@ -543,8 +543,8 @@
   <!-- ══════ SCREEN 3：チェックリスト ══════ -->
   <div class="screen" id="screen3">
     <div class="card">
-      <div class="card-title">📋 あと少しで確認完了</div>
-      <div class="card-sub">以下の項目を確認してください。<br>すべてにチェックを入れてください。</div>
+      <div class="card-title">📋 最後に1つだけ確認します</div>
+      <div class="card-sub">当てはまらないものにチェックを入れてください。<br>全部チェックできればOKです。</div>
 
       <div class="checklist" id="checklist">
         <div class="check-item" onclick="toggleCheck(this)">
@@ -599,7 +599,7 @@
       <span class="ob-icon">🏷️</span>
       <div class="offer-text">
         <strong>初月限定キャンペーン実施中</strong><br>
-        今なら通常料金より大幅割引。診察料込みでスタートできます。
+        今だけ初回特別価格。診察料もコミコミです。
       </div>
     </div>
 
@@ -619,10 +619,10 @@
     </div>
 
     <button class="btn-primary" onclick="goLine()" style="font-size:17px;height:60px;">
-      申し込みに進む（無料相談） <span class="btn-arrow">→</span>
+      無料で相談してみる <span class="btn-arrow">→</span>
     </button>
     <div style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:8px;">
-      LINEに遷移して登録後、すぐに決済画面へご案内します
+      LINEを追加するだけ。すぐに始められます。
     </div>
 
     <div class="disclaimer">
@@ -681,7 +681,7 @@
       verdictText.textContent = '処方目安の範囲に該当します（BMI ' + bmiVal + '）';
     } else {
       verdict.className = 'bmi-verdict negative';
-      verdictText.textContent = '現在の目安範囲外ですが、合併症がある場合は対象になる可能性があります';
+      verdictText.textContent = 'BMIが低めでも、気になる方はそのまま進んでみてください';
     }
     goStep(2);
   }
