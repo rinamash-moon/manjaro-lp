@@ -1,0 +1,391 @@
+(function() {
+  // ── スタイル注入 ──────────────────────────────
+  const style = document.createElement('style');
+  style.textContent = `
+    #mj-bot-wrap * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Helvetica Neue', 'Hiragino Sans', 'Noto Sans JP', sans-serif; }
+
+    /* トリガーボタン */
+    #mj-trigger {
+      position: fixed; bottom: 24px; right: 24px; z-index: 99999;
+      display: flex; align-items: center; gap: 10px;
+      background: #00B96B; color: #fff;
+      border: none; border-radius: 999px;
+      padding: 13px 20px 13px 16px;
+      font-size: 14px; font-weight: 700;
+      cursor: pointer; box-shadow: 0 4px 20px rgba(0,185,107,.45);
+      transition: transform .2s, box-shadow .2s;
+      animation: mjBounceIn .6s cubic-bezier(.34,1.56,.64,1) both;
+    }
+    #mj-trigger:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,185,107,.5); }
+    #mj-trigger .mj-icon { font-size: 20px; }
+    #mj-trigger .mj-close-x { display: none; font-size: 18px; font-weight: 400; }
+
+    /* 吹き出しバブル */
+    #mj-bubble {
+      position: fixed; bottom: 88px; right: 24px; z-index: 99998;
+      background: #fff; border-radius: 16px 16px 4px 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.13);
+      padding: 12px 16px; max-width: 240px;
+      font-size: 13px; line-height: 1.55; color: #1F2937;
+      opacity: 0; transform: translateY(10px) scale(.95);
+      transition: opacity .3s ease, transform .3s ease;
+      pointer-events: none;
+    }
+    #mj-bubble.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    #mj-bubble::after {
+      content: ''; position: absolute; bottom: -8px; right: 20px;
+      border: 8px solid transparent; border-top-color: #fff;
+      border-bottom: none;
+    }
+
+    /* パネル本体 */
+    #mj-panel {
+      position: fixed; bottom: 88px; right: 24px; z-index: 99998;
+      width: 360px; max-width: calc(100vw - 32px);
+      max-height: calc(100vh - 120px);
+      background: #fff; border-radius: 20px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.18);
+      overflow: hidden; display: flex; flex-direction: column;
+      opacity: 0; transform: translateY(20px) scale(.96);
+      transition: opacity .3s ease, transform .3s ease;
+      pointer-events: none;
+    }
+    #mj-panel.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+
+    /* パネルヘッダー */
+    #mj-panel-header {
+      background: linear-gradient(135deg, #00B96B, #009A58);
+      padding: 16px 18px; color: #fff; flex-shrink: 0;
+    }
+    #mj-panel-header .mj-h-logo { font-size: 10px; font-weight: 600; letter-spacing: .1em; opacity: .8; margin-bottom: 3px; }
+    #mj-panel-header .mj-h-title { font-size: 15px; font-weight: 700; }
+    #mj-panel-header .mj-h-sub { font-size: 12px; opacity: .85; margin-top: 2px; }
+
+    /* パネルコンテンツ */
+    #mj-panel-body {
+      flex: 1; overflow-y: auto; padding: 18px 16px;
+      background: linear-gradient(160deg, #f0fdf7, #f0f9ff);
+    }
+
+    /* プログレス */
+    .mj-prog-wrap { display: flex; gap: 5px; margin-bottom: 6px; }
+    .mj-prog-step { flex: 1; height: 4px; border-radius: 99px; background: #E5E7EB; transition: background .4s; }
+    .mj-prog-step.active { background: #00B96B; }
+    .mj-prog-step.done { background: #CCEFDF; }
+    .mj-prog-label { font-size: 10px; color: #9CA3AF; text-align: center; margin-bottom: 14px; }
+    .mj-prog-label span { color: #00B96B; font-weight: 700; }
+
+    /* カード */
+    .mj-card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 10px; animation: mjFadeUp .35s ease both; }
+    @keyframes mjFadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes mjBounceIn { from { opacity:0; transform:scale(.7); } to { opacity:1; transform:scale(1); } }
+
+    .mj-card-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+    .mj-card-sub { font-size: 12px; color: #6B7280; margin-bottom: 14px; line-height: 1.5; }
+
+    /* 入力 */
+    .mj-field { margin-bottom: 12px; }
+    .mj-label { font-size: 11px; font-weight: 600; color: #374151; margin-bottom: 5px; display: block; }
+    .mj-input-row { display: flex; align-items: center; gap: 8px; }
+    .mj-input {
+      flex: 1; height: 44px; border: 1.5px solid #E5E7EB; border-radius: 8px;
+      font-size: 20px; font-weight: 700; text-align: center; color: #111827;
+      outline: none; background: #F9FAFB; -moz-appearance: textfield;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .mj-input::-webkit-inner-spin-button, .mj-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+    .mj-input:focus { border-color: #00B96B; box-shadow: 0 0 0 3px rgba(0,185,107,.12); background: #fff; }
+    .mj-unit { font-size: 13px; color: #9CA3AF; min-width: 22px; }
+
+    /* ボタン */
+    .mj-btn {
+      width: 100%; height: 48px; background: #00B96B; color: #fff;
+      border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: background .2s, transform .1s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .mj-btn:hover { background: #009A58; }
+    .mj-btn:active { transform: scale(.98); }
+    .mj-btn:disabled { background: #E5E7EB; color: #9CA3AF; cursor: not-allowed; }
+    .mj-btn-arrow { transition: transform .2s; }
+    .mj-btn:hover .mj-btn-arrow { transform: translateX(3px); }
+
+    /* BMI結果 */
+    .mj-bmi-card { background: #E8FAF2; border: 1.5px solid #CCEFDF; border-radius: 12px; padding: 14px; margin-bottom: 10px; animation: mjFadeUp .4s ease both; }
+    .mj-bmi-label { font-size: 11px; color: #4B5563; margin-bottom: 2px; }
+    .mj-bmi-num { font-size: 44px; font-weight: 700; color: #009A58; line-height: 1; margin-bottom: 10px; }
+    .mj-bar-wrap { position: relative; height: 7px; border-radius: 99px; background: linear-gradient(to right,#93C5FD,#6EE7B7 40%,#00B96B 70%,#F59E0B 85%,#EF4444); margin-bottom: 4px; }
+    .mj-marker { position: absolute; top: -5px; width: 16px; height: 16px; background: #fff; border: 3px solid #009A58; border-radius: 50%; transform: translateX(-50%); transition: left .6s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+    .mj-bar-labels { display: flex; justify-content: space-between; font-size: 9px; color: #9CA3AF; margin-bottom: 10px; }
+    .mj-verdict { display: flex; align-items: center; gap: 7px; background: #fff; border-radius: 8px; padding: 10px 12px; font-size: 12px; font-weight: 600; color: #009A58; }
+    .mj-verdict.neg { color: #F59E0B; }
+
+    /* チェックリスト */
+    .mj-checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .mj-check-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; background: #F9FAFB; transition: border-color .2s, background .2s; user-select: none; }
+    .mj-check-item:hover { border-color: #CCEFDF; background: #E8FAF2; }
+    .mj-check-item.checked { border-color: #00B96B; background: #E8FAF2; }
+    .mj-check-box { width: 20px; height: 20px; border-radius: 5px; border: 2px solid #D1D5DB; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #fff; transition: all .2s; margin-top: 1px; }
+    .mj-check-item.checked .mj-check-box { background: #00B96B; border-color: #00B96B; }
+    .mj-check-mark { display: none; color: #fff; font-size: 11px; font-weight: 700; }
+    .mj-check-item.checked .mj-check-mark { display: block; }
+    .mj-check-text { font-size: 12px; color: #1F2937; line-height: 1.45; }
+    .mj-check-note { font-size: 11px; color: #9CA3AF; text-align: center; margin-bottom: 12px; }
+
+    /* 結果ヒーロー */
+    .mj-result-hero { background: linear-gradient(135deg,#00B96B,#009A58); border-radius: 12px; padding: 18px 16px; color: #fff; text-align: center; margin-bottom: 10px; animation: mjFadeUp .4s ease both; position: relative; overflow: hidden; }
+    .mj-result-hero::before { content:''; position:absolute; top:-30px; right:-30px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,.08); }
+    .mj-result-emoji { font-size: 30px; margin-bottom: 6px; }
+    .mj-result-title { font-size: 16px; font-weight: 700; line-height: 1.4; margin-bottom: 12px; }
+    .mj-result-rows { display: flex; flex-direction: column; gap: 6px; }
+    .mj-result-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.15); border-radius: 7px; padding: 8px 12px; font-size: 12px; }
+    .mj-result-row .rv { font-weight: 700; }
+
+    /* オファー */
+    .mj-offer { background: #FFF7ED; border: 1.5px solid #FCD34D; border-radius: 8px; padding: 11px 13px; display: flex; gap: 8px; margin-bottom: 10px; font-size: 12px; color: #1F2937; line-height: 1.5; }
+    .mj-offer strong { color: #B45309; font-size: 13px; }
+
+    /* CTA */
+    .mj-cta-btn {
+      width: 100%; height: 52px; background: #00B96B; color: #fff;
+      border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: background .2s, transform .1s;
+      display: flex; align-items: center; justify-content: center; gap: 6px;
+      margin-bottom: 6px;
+    }
+    .mj-cta-btn:hover { background: #009A58; }
+    .mj-cta-sub { font-size: 11px; color: #9CA3AF; text-align: center; margin-bottom: 10px; }
+    .mj-disclaimer { font-size: 9px; color: #9CA3AF; text-align: center; line-height: 1.7; }
+
+    /* 安心訴求 */
+    .mj-trust { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+    .mj-trust-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #9CA3AF; }
+
+    @media (max-width: 400px) {
+      #mj-panel { width: calc(100vw - 16px); right: 8px; bottom: 80px; }
+      #mj-trigger { right: 8px; bottom: 16px; }
+      #mj-bubble { right: 8px; }
+    }
+  `;
+  document.head.appendChild(style);
+
+  // ── HTML注入 ──────────────────────────────────
+  const wrap = document.createElement('div');
+  wrap.id = 'mj-bot-wrap';
+  wrap.innerHTML = `
+    <!-- 吹き出し -->
+    <div id="mj-bubble">
+      あなたはマンジャロの対象かも？<br>
+      <strong>30秒で確認できます 👇</strong>
+    </div>
+
+    <!-- トリガーボタン -->
+    <button id="mj-trigger" onclick="mjToggle()">
+      <span class="mj-icon">💊</span>
+      <span id="mj-trigger-text">対象か確認する</span>
+      <span class="mj-close-x" id="mj-close-x">✕</span>
+    </button>
+
+    <!-- パネル -->
+    <div id="mj-panel">
+      <div id="mj-panel-header">
+        <div class="mj-h-logo">MOUNJARO ONLINE</div>
+        <div class="mj-h-title">処方対象か30秒でチェック</div>
+        <div class="mj-h-sub">3ステップ・入力は数字だけでOK</div>
+      </div>
+      <div id="mj-panel-body">
+
+        <!-- プログレス -->
+        <div class="mj-prog-wrap">
+          <div class="mj-prog-step active" id="mj-ps1"></div>
+          <div class="mj-prog-step" id="mj-ps2"></div>
+          <div class="mj-prog-step" id="mj-ps3"></div>
+        </div>
+        <div class="mj-prog-label" id="mj-prog-label"><span>Step 1</span> BMI入力</div>
+
+        <!-- SCREEN 1: BMI入力 -->
+        <div id="mj-s1">
+          <div class="mj-card">
+            <div class="mj-card-title">📏 まず、BMIを確認しましょう</div>
+            <div class="mj-card-sub">身長と体重を入れるだけ。<br>30秒で終わります。</div>
+            <div class="mj-field">
+              <label class="mj-label">身長</label>
+              <div class="mj-input-row">
+                <input class="mj-input" type="number" id="mj-h" placeholder="165" min="140" max="210">
+                <span class="mj-unit">cm</span>
+              </div>
+            </div>
+            <div class="mj-field">
+              <label class="mj-label">体重</label>
+              <div class="mj-input-row">
+                <input class="mj-input" type="number" id="mj-w" placeholder="70" min="30" max="200">
+                <span class="mj-unit">kg</span>
+              </div>
+            </div>
+            <button class="mj-btn" onclick="mjCalcBMI()">
+              BMIを計算する <span class="mj-btn-arrow">→</span>
+            </button>
+          </div>
+          <div class="mj-trust">
+            <div class="mj-trust-item">🔒 安全に管理</div>
+            <div class="mj-trust-item">🆓 登録不要・無料</div>
+          </div>
+        </div>
+
+        <!-- SCREEN 2: BMI結果 -->
+        <div id="mj-s2" style="display:none">
+          <div class="mj-bmi-card">
+            <div class="mj-bmi-label">あなたのBMI</div>
+            <div class="mj-bmi-num" id="mj-bmi-num">—</div>
+            <div class="mj-bar-wrap"><div class="mj-marker" id="mj-marker" style="left:50%"></div></div>
+            <div class="mj-bar-labels"><span>低体重<br>18.5未満</span><span>普通体重<br>25未満</span><span>対象目安<br>25以上▶</span></div>
+            <div class="mj-verdict" id="mj-verdict"><span>✅</span><span id="mj-verdict-text">処方目安の範囲に該当します</span></div>
+          </div>
+          <div class="mj-card">
+            <div class="mj-card-title">マンジャロ処方目安について</div>
+            <div class="mj-card-sub">BMI 25以上が目安です。BMIが低くても、体型や体質によっては処方できる場合があります。</div>
+            <button class="mj-btn" onclick="mjGoScreen(3)">次のステップへ <span class="mj-btn-arrow">→</span></button>
+          </div>
+        </div>
+
+        <!-- SCREEN 3: チェック -->
+        <div id="mj-s3" style="display:none">
+          <div class="mj-card">
+            <div class="mj-card-title">📋 最後に1つだけ確認します</div>
+            <div class="mj-card-sub">当てはまらないものにチェックを入れてください。<br>全部チェックできればOKです。</div>
+            <div class="mj-checklist">
+              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">2型糖尿病と診断されたことがない</span></div>
+              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">妊娠中・授乳中ではない</span></div>
+              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">重度の腎臓・肝臓の疾患がない</span></div>
+              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">膵臓の疾患にかかったことがない</span></div>
+              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">他のGLP-1製剤を使用していない</span></div>
+            </div>
+            <div class="mj-check-note">💡 1つでも該当する場合は医師にご相談ください</div>
+            <button class="mj-btn" id="mj-check-btn" onclick="mjGoScreen(4)" disabled>
+              結果を見る <span class="mj-btn-arrow">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- SCREEN 4: 判定結果 -->
+        <div id="mj-s4" style="display:none">
+          <div class="mj-result-hero">
+            <div class="mj-result-emoji">🎉</div>
+            <div class="mj-result-title">診察にお申し込み<br>いただけます！</div>
+            <div class="mj-result-rows">
+              <div class="mj-result-row"><span>BMI</span><span class="rv"><span id="mj-result-bmi">—</span> ✅ 処方目安に該当</span></div>
+              <div class="mj-result-row"><span>禁忌チェック</span><span class="rv">✅ 該当なし</span></div>
+            </div>
+          </div>
+          <div class="mj-offer">
+            <span>🏷️</span>
+            <div><strong>初月限定キャンペーン実施中</strong><br>今だけ初回特別価格。診察料もコミコミです。</div>
+          </div>
+          <button class="mj-cta-btn" onclick="mjGoLine()">
+            無料で相談してみる →
+          </button>
+          <div class="mj-cta-sub">LINEを追加するだけ。すぐに始められます。</div>
+          <div class="mj-disclaimer">本結果は医師による正式な診断ではありません。処方の可否は診察時に医師が最終判断します。本サービスは自由診療です。</div>
+        </div>
+
+      </div>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+
+  // ── ロジック ──────────────────────────────────
+  let mjBMI = 0;
+  let mjOpen = false;
+
+  // 3秒後に吹き出し表示
+  setTimeout(function() {
+    const bubble = document.getElementById('mj-bubble');
+    if (bubble) bubble.classList.add('show');
+    // 8秒後に吹き出し消す
+    setTimeout(function() {
+      if (bubble && !mjOpen) bubble.classList.remove('show');
+    }, 8000);
+  }, 3000);
+
+  window.mjToggle = function() {
+    mjOpen = !mjOpen;
+    const panel = document.getElementById('mj-panel');
+    const bubble = document.getElementById('mj-bubble');
+    const icon = document.querySelector('#mj-trigger .mj-icon');
+    const closeX = document.getElementById('mj-close-x');
+    const triggerText = document.getElementById('mj-trigger-text');
+    if (mjOpen) {
+      panel.classList.add('show');
+      bubble.classList.remove('show');
+      icon.style.display = 'none';
+      closeX.style.display = 'block';
+      triggerText.textContent = '閉じる';
+    } else {
+      panel.classList.remove('show');
+      icon.style.display = 'block';
+      closeX.style.display = 'none';
+      triggerText.textContent = '対象か確認する';
+    }
+  };
+
+  window.mjGoScreen = function(n) {
+    for (let i = 1; i <= 4; i++) {
+      const el = document.getElementById('mj-s' + i);
+      if (el) el.style.display = (i === n) ? 'block' : 'none';
+    }
+    // プログレス更新
+    const labels = ['', 'Step 1 BMI入力', 'Step 2 BMI結果', 'Step 3 確認', 'Step 3 判定結果'];
+    const stepMap = [0, 1, 2, 3, 3];
+    const cur = stepMap[n] || 1;
+    for (let i = 1; i <= 3; i++) {
+      const ps = document.getElementById('mj-ps' + i);
+      if (!ps) continue;
+      ps.className = 'mj-prog-step';
+      if (i < cur) ps.classList.add('done');
+      if (i === cur) ps.classList.add('active');
+    }
+    const pl = document.getElementById('mj-prog-label');
+    if (pl) pl.innerHTML = '<span>Step ' + cur + '</span> ' + (labels[n] || '').replace(/Step \d+ /, '');
+    // パネル内スクロールをトップへ
+    const body = document.getElementById('mj-panel-body');
+    if (body) body.scrollTop = 0;
+  };
+
+  window.mjCalcBMI = function() {
+    const h = parseFloat(document.getElementById('mj-h').value);
+    const w = parseFloat(document.getElementById('mj-w').value);
+    if (!h || !w || h < 140 || h > 210 || w < 30 || w > 200) {
+      alert('身長・体重を正しく入力してください');
+      return;
+    }
+    mjBMI = Math.round(w / ((h / 100) ** 2) * 10) / 10;
+    document.getElementById('mj-bmi-num').textContent = mjBMI;
+    document.getElementById('mj-result-bmi').textContent = mjBMI;
+    const pct = Math.min(Math.max((mjBMI - 15) / 25 * 100, 3), 97);
+    document.getElementById('mj-marker').style.left = pct + '%';
+    const verdict = document.getElementById('mj-verdict');
+    const vt = document.getElementById('mj-verdict-text');
+    if (mjBMI >= 25) {
+      verdict.className = 'mj-verdict';
+      vt.textContent = '処方目安の範囲に該当します（BMI ' + mjBMI + '）';
+    } else {
+      verdict.className = 'mj-verdict neg';
+      vt.textContent = 'BMIが低めでも、気になる方はそのまま進んでみてください';
+    }
+    mjGoScreen(2);
+  };
+
+  window.mjToggleCheck = function(el) {
+    el.classList.toggle('checked');
+    const total = document.querySelectorAll('.mj-check-item').length;
+    const checked = document.querySelectorAll('.mj-check-item.checked').length;
+    const btn = document.getElementById('mj-check-btn');
+    if (btn) btn.disabled = (checked < total);
+  };
+
+  window.mjGoLine = function() {
+    // ← LINE友だち追加URLに差し替えてください
+    window.open('https://lin.ee/XXXXXXX', '_blank');
+  };
+
+})();
