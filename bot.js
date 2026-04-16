@@ -130,7 +130,12 @@
     .mj-check-mark { display: none; color: #fff; font-size: 11px; font-weight: 700; }
     .mj-check-item.checked .mj-check-mark { display: block; }
     .mj-check-text { font-size: 12px; color: #1F2937; line-height: 1.45; }
-    .mj-check-note { font-size: 11px; color: #9CA3AF; text-align: center; margin-bottom: 12px; }
+    .mj-choice-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+    .mj-choice-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; background: #F9FAFB; transition: border-color .2s, background .2s; user-select: none; font-size: 13px; color: #1F2937; }
+    .mj-choice-item:hover { border-color: #CCEFDF; background: #E8FAF2; }
+    .mj-choice-item.selected { border-color: #00B96B; background: #E8FAF2; font-weight: 600; }
+    .mj-choice-icon { font-size: 18px; }
+    .mj-choice-text { flex: 1; }
 
     /* 結果ヒーロー */
     .mj-result-hero { background: linear-gradient(135deg,#00B96B,#009A58); border-radius: 12px; padding: 18px 16px; color: #fff; text-align: center; margin-bottom: 10px; animation: mjFadeUp .4s ease both; position: relative; overflow: hidden; }
@@ -190,8 +195,8 @@
     <div id="mj-panel">
       <div id="mj-panel-header">
         <div class="mj-h-logo">MOUNJARO ONLINE</div>
-        <div class="mj-h-title">処方対象か30秒でチェック</div>
-        <div class="mj-h-sub">3ステップ・入力は数字だけでOK</div>
+        <div class="mj-h-title">あなたはマンジャロの対象かも？</div>
+        <div class="mj-h-sub">30秒で確認できます 👇</div>
       </div>
       <div id="mj-panel-body">
 
@@ -248,23 +253,34 @@
           </div>
         </div>
 
-        <!-- SCREEN 3: チェック -->
+        <!-- SCREEN 3: ライフスタイル設問 -->
         <div id="mj-s3" style="display:none">
-          <div class="mj-card">
-            <div class="mj-card-title">📋 最後に1つだけ確認します</div>
-            <div class="mj-card-sub">当てはまらないものにチェックを入れてください。<br>全部チェックできればOKです。</div>
-            <div class="mj-checklist">
-              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">2型糖尿病と診断されたことがない</span></div>
-              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">妊娠中・授乳中ではない</span></div>
-              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">重度の腎臓・肝臓の疾患がない</span></div>
-              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">膵臓の疾患にかかったことがない</span></div>
-              <div class="mj-check-item" onclick="mjToggleCheck(this)"><div class="mj-check-box"><span class="mj-check-mark">✓</span></div><span class="mj-check-text">他のGLP-1製剤を使用していない</span></div>
+
+          <!-- Q1: 運動習慣 -->
+          <div class="mj-card" id="mj-q1-card">
+            <div class="mj-card-title">🏃 週にどのくらい運動しますか？</div>
+            <div class="mj-card-sub">当てはまるものを選んでください</div>
+            <div class="mj-choice-list" id="mj-q1">
+              <div class="mj-choice-item" onclick="mjSelectChoice('q1', this)"><span class="mj-choice-icon">🛋️</span><span class="mj-choice-text">ほぼしない</span></div>
+              <div class="mj-choice-item" onclick="mjSelectChoice('q1', this)"><span class="mj-choice-icon">🚶</span><span class="mj-choice-text">たまにする</span></div>
+              <div class="mj-choice-item" onclick="mjSelectChoice('q1', this)"><span class="mj-choice-icon">💪</span><span class="mj-choice-text">よくする</span></div>
             </div>
-            <div class="mj-check-note">💡 1つでも該当する場合は医師にご相談ください</div>
-            <button class="mj-btn" id="mj-check-btn" onclick="mjGoScreen(4)" disabled>
-              結果を見る <span class="mj-btn-arrow">→</span>
-            </button>
           </div>
+
+          <!-- Q2: ダイエット歴 -->
+          <div class="mj-card" id="mj-q2-card" style="opacity:.4;pointer-events:none">
+            <div class="mj-card-title">📉 ダイエットで成功したことはありますか？</div>
+            <div class="mj-card-sub">当てはまるものを選んでください</div>
+            <div class="mj-choice-list" id="mj-q2">
+              <div class="mj-choice-item" onclick="mjSelectChoice('q2', this)"><span class="mj-choice-icon">😓</span><span class="mj-choice-text">成功したことがない</span></div>
+              <div class="mj-choice-item" onclick="mjSelectChoice('q2', this)"><span class="mj-choice-icon">🔄</span><span class="mj-choice-text">リバウンドしてしまった</span></div>
+              <div class="mj-choice-item" onclick="mjSelectChoice('q2', this)"><span class="mj-choice-icon">✅</span><span class="mj-choice-text">成功して維持できている</span></div>
+            </div>
+          </div>
+
+          <button class="mj-btn" id="mj-check-btn" onclick="mjGoScreen(4)" disabled>
+            結果を見る <span class="mj-btn-arrow">→</span>
+          </button>
         </div>
 
         <!-- SCREEN 4: 判定結果 -->
@@ -375,6 +391,22 @@
     mjGoScreen(2);
   };
 
+  window.mjSelectChoice = function(qId, el) {
+    // 同じ設問の選択を解除してから選択
+    document.querySelectorAll('#mj-' + qId + ' .mj-choice-item').forEach(function(i) { i.classList.remove('selected'); });
+    el.classList.add('selected');
+    // Q1が選ばれたらQ2を活性化
+    if (qId === 'q1') {
+      const q2card = document.getElementById('mj-q2-card');
+      if (q2card) { q2card.style.opacity = '1'; q2card.style.pointerEvents = 'auto'; }
+    }
+    // Q1とQ2両方選ばれたらCTAを活性化
+    const q1done = document.querySelector('#mj-q1 .mj-choice-item.selected');
+    const q2done = document.querySelector('#mj-q2 .mj-choice-item.selected');
+    const btn = document.getElementById('mj-check-btn');
+    if (btn) btn.disabled = !(q1done && q2done);
+  };
+
   window.mjToggleCheck = function(el) {
     el.classList.toggle('checked');
     const total = document.querySelectorAll('.mj-check-item').length;
@@ -384,8 +416,7 @@
   };
 
   window.mjGoLine = function() {
-    // ← LINE友だち追加URLに差し替えてください
-    window.open('https://lin.ee/XXXXXXX', '_blank');
+    window.open('https://lin.ee/q3y9Y24', '_blank');
   };
 
 })();
