@@ -8,15 +8,15 @@
     #mj-trigger {
       position: fixed; bottom: 24px; right: 24px; z-index: 99999;
       display: flex; align-items: center; gap: 10px;
-      background: #00B96B; color: #fff;
-      border: none; border-radius: 999px;
+      background: linear-gradient(135deg, #FF3D8B, #E0256F);
+      color: #fff; border: none; border-radius: 999px;
       padding: 13px 20px 13px 16px;
       font-size: 14px; font-weight: 700;
-      cursor: pointer; box-shadow: 0 4px 20px rgba(0,185,107,.45);
+      cursor: pointer; box-shadow: 0 4px 20px rgba(255,61,139,.45);
       transition: transform .2s, box-shadow .2s;
       animation: mjBounceIn .6s cubic-bezier(.34,1.56,.64,1) both;
     }
-    #mj-trigger:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,185,107,.5); }
+    #mj-trigger:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(255,61,139,.55); }
     #mj-trigger .mj-icon { font-size: 20px; }
     #mj-trigger .mj-close-x { display: none; font-size: 18px; font-weight: 400; }
 
@@ -26,7 +26,7 @@
       background: #fff; border-radius: 16px 16px 4px 16px;
       box-shadow: 0 4px 24px rgba(0,0,0,.13);
       padding: 12px 16px; max-width: 240px;
-      font-size: 13px; line-height: 1.55; color: #1F2937;
+      font-size: 13px; line-height: 1.55; color: #1A2B5E;
       opacity: 0; transform: translateY(10px) scale(.95);
       transition: opacity .3s ease, transform .3s ease;
       pointer-events: none;
@@ -38,49 +38,81 @@
       border-bottom: none;
     }
 
+    /* オーバーレイ（スマホ全画面用） */
+    #mj-overlay {
+      display: none; position: fixed; inset: 0; z-index: 99997;
+      background: rgba(26,43,94,.5); backdrop-filter: blur(2px);
+    }
+    #mj-overlay.show { display: block; }
+
     /* パネル本体 */
     #mj-panel {
-      position: fixed; bottom: 88px; right: 24px; z-index: 99998;
-      width: 360px; max-width: calc(100vw - 32px);
-      max-height: calc(100vh - 120px);
-      background: #fff; border-radius: 20px;
-      box-shadow: 0 8px 40px rgba(0,0,0,.18);
+      position: fixed; z-index: 99998;
+      background: #fff;
       overflow: hidden; display: flex; flex-direction: column;
-      opacity: 0; transform: translateY(20px) scale(.96);
-      transition: opacity .3s ease, transform .3s ease;
-      pointer-events: none;
+      opacity: 0; pointer-events: none;
+      transition: opacity .35s ease, transform .35s ease;
     }
-    #mj-panel.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    /* PC: 右下ポップアップ */
+    @media (min-width: 600px) {
+      #mj-panel {
+        bottom: 88px; right: 24px;
+        width: 380px; max-height: calc(100vh - 120px);
+        border-radius: 20px;
+        box-shadow: 0 8px 40px rgba(0,0,0,.18);
+        transform: translateY(20px) scale(.96);
+      }
+      #mj-panel.show { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    }
+    /* スマホ: 全画面 */
+    @media (max-width: 599px) {
+      #mj-panel {
+        inset: 0; border-radius: 0;
+        transform: translateY(100%);
+      }
+      #mj-panel.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+      #mj-trigger { bottom: 16px; right: 16px; }
+      #mj-bubble { right: 16px; bottom: 80px; }
+    }
 
     /* パネルヘッダー */
     #mj-panel-header {
-      background: linear-gradient(135deg, #00B96B, #009A58);
-      padding: 16px 18px; color: #fff; flex-shrink: 0;
+      background: linear-gradient(135deg, #4A6FD4, #2A4FAA);
+      padding: 16px 18px 14px; color: #fff; flex-shrink: 0;
+      position: relative;
     }
-    #mj-panel-header .mj-h-logo { font-size: 10px; font-weight: 600; letter-spacing: .1em; opacity: .8; margin-bottom: 3px; }
-    #mj-panel-header .mj-h-title { font-size: 15px; font-weight: 700; }
-    #mj-panel-header .mj-h-sub { font-size: 12px; opacity: .85; margin-top: 2px; }
+    #mj-panel-header .mj-h-logo { font-size: 10px; font-weight: 600; letter-spacing: .12em; opacity: .75; margin-bottom: 3px; text-transform: uppercase; }
+    #mj-panel-header .mj-h-title { font-size: 16px; font-weight: 700; line-height: 1.4; }
+    #mj-panel-header .mj-h-sub { font-size: 12px; opacity: .85; margin-top: 3px; }
+    #mj-panel-header .mj-h-close {
+      position: absolute; top: 14px; right: 16px;
+      background: rgba(255,255,255,.2); border: none; color: #fff;
+      width: 28px; height: 28px; border-radius: 50%; font-size: 16px;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      transition: background .2s;
+    }
+    #mj-panel-header .mj-h-close:hover { background: rgba(255,255,255,.35); }
 
     /* パネルコンテンツ */
     #mj-panel-body {
       flex: 1; overflow-y: auto; padding: 18px 16px;
-      background: linear-gradient(160deg, #f0fdf7, #f0f9ff);
+      background: linear-gradient(160deg, #f0f4ff, #fdf0f7);
     }
 
     /* プログレス */
     .mj-prog-wrap { display: flex; gap: 5px; margin-bottom: 6px; }
     .mj-prog-step { flex: 1; height: 4px; border-radius: 99px; background: #E5E7EB; transition: background .4s; }
-    .mj-prog-step.active { background: #00B96B; }
-    .mj-prog-step.done { background: #CCEFDF; }
+    .mj-prog-step.active { background: #4A6FD4; }
+    .mj-prog-step.done { background: #A8C0F0; }
     .mj-prog-label { font-size: 10px; color: #9CA3AF; text-align: center; margin-bottom: 14px; }
-    .mj-prog-label span { color: #00B96B; font-weight: 700; }
+    .mj-prog-label span { color: #4A6FD4; font-weight: 700; }
 
     /* カード */
-    .mj-card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(0,0,0,.07); margin-bottom: 10px; animation: mjFadeUp .35s ease both; }
+    .mj-card { background: #fff; border-radius: 12px; padding: 16px; box-shadow: 0 2px 12px rgba(74,111,212,.1); margin-bottom: 10px; animation: mjFadeUp .35s ease both; }
     @keyframes mjFadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
     @keyframes mjBounceIn { from { opacity:0; transform:scale(.7); } to { opacity:1; transform:scale(1); } }
 
-    .mj-card-title { font-size: 14px; font-weight: 700; color: #111827; margin-bottom: 4px; }
+    .mj-card-title { font-size: 14px; font-weight: 700; color: #1A2B5E; margin-bottom: 4px; }
     .mj-card-sub { font-size: 12px; color: #6B7280; margin-bottom: 14px; line-height: 1.5; }
 
     /* 入力 */
@@ -89,88 +121,84 @@
     .mj-input-row { display: flex; align-items: center; gap: 8px; }
     .mj-input {
       flex: 1; height: 44px; border: 1.5px solid #E5E7EB; border-radius: 8px;
-      font-size: 20px; font-weight: 700; text-align: center; color: #111827;
+      font-size: 20px; font-weight: 700; text-align: center; color: #1A2B5E;
       outline: none; background: #F9FAFB; -moz-appearance: textfield;
       transition: border-color .2s, box-shadow .2s;
     }
     .mj-input::-webkit-inner-spin-button, .mj-input::-webkit-outer-spin-button { -webkit-appearance: none; }
-    .mj-input:focus { border-color: #00B96B; box-shadow: 0 0 0 3px rgba(0,185,107,.12); background: #fff; }
+    .mj-input:focus { border-color: #4A6FD4; box-shadow: 0 0 0 3px rgba(74,111,212,.12); background: #fff; }
     .mj-unit { font-size: 13px; color: #9CA3AF; min-width: 22px; }
 
     /* ボタン */
     .mj-btn {
-      width: 100%; height: 48px; background: #00B96B; color: #fff;
-      border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
-      cursor: pointer; transition: background .2s, transform .1s;
+      width: 100%; height: 48px;
+      background: linear-gradient(135deg, #4A6FD4, #2A4FAA);
+      color: #fff; border: none; border-radius: 8px; font-size: 14px; font-weight: 700;
+      cursor: pointer; transition: opacity .2s, transform .1s;
       display: flex; align-items: center; justify-content: center; gap: 6px;
     }
-    .mj-btn:hover { background: #009A58; }
+    .mj-btn:hover { opacity: .9; }
     .mj-btn:active { transform: scale(.98); }
     .mj-btn:disabled { background: #E5E7EB; color: #9CA3AF; cursor: not-allowed; }
     .mj-btn-arrow { transition: transform .2s; }
     .mj-btn:hover .mj-btn-arrow { transform: translateX(3px); }
 
     /* BMI結果 */
-    .mj-bmi-card { background: #E8FAF2; border: 1.5px solid #CCEFDF; border-radius: 12px; padding: 14px; margin-bottom: 10px; animation: mjFadeUp .4s ease both; }
+    .mj-bmi-card { background: #EEF2FF; border: 1.5px solid #C7D5F8; border-radius: 12px; padding: 14px; margin-bottom: 10px; animation: mjFadeUp .4s ease both; }
     .mj-bmi-label { font-size: 11px; color: #4B5563; margin-bottom: 2px; }
-    .mj-bmi-num { font-size: 44px; font-weight: 700; color: #009A58; line-height: 1; margin-bottom: 10px; }
-    .mj-bar-wrap { position: relative; height: 7px; border-radius: 99px; background: linear-gradient(to right,#93C5FD,#6EE7B7 40%,#00B96B 70%,#F59E0B 85%,#EF4444); margin-bottom: 4px; }
-    .mj-marker { position: absolute; top: -5px; width: 16px; height: 16px; background: #fff; border: 3px solid #009A58; border-radius: 50%; transform: translateX(-50%); transition: left .6s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 2px 6px rgba(0,0,0,.15); }
+    .mj-bmi-num { font-size: 44px; font-weight: 700; color: #2A4FAA; line-height: 1; margin-bottom: 10px; }
+    .mj-bar-wrap { position: relative; height: 7px; border-radius: 99px; background: linear-gradient(to right,#93C5FD,#6EE7B7 40%,#4A6FD4 70%,#F59E0B 85%,#EF4444); margin-bottom: 4px; }
+    .mj-marker { position: absolute; top: -5px; width: 16px; height: 16px; background: #fff; border: 3px solid #2A4FAA; border-radius: 50%; transform: translateX(-50%); transition: left .6s cubic-bezier(.34,1.56,.64,1); box-shadow: 0 2px 6px rgba(0,0,0,.15); }
     .mj-bar-labels { display: flex; justify-content: space-between; font-size: 9px; color: #9CA3AF; margin-bottom: 10px; }
-    .mj-verdict { display: flex; align-items: center; gap: 7px; background: #fff; border-radius: 8px; padding: 10px 12px; font-size: 12px; font-weight: 600; color: #009A58; }
+    .mj-verdict { display: flex; align-items: center; gap: 7px; background: #fff; border-radius: 8px; padding: 10px 12px; font-size: 12px; font-weight: 600; color: #2A4FAA; }
     .mj-verdict.neg { color: #F59E0B; }
 
     /* チェックリスト */
     .mj-checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
     .mj-check-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; background: #F9FAFB; transition: border-color .2s, background .2s; user-select: none; }
-    .mj-check-item:hover { border-color: #CCEFDF; background: #E8FAF2; }
-    .mj-check-item.checked { border-color: #00B96B; background: #E8FAF2; }
+    .mj-check-item:hover { border-color: #C7D5F8; background: #EEF2FF; }
+    .mj-check-item.checked { border-color: #4A6FD4; background: #EEF2FF; }
     .mj-check-box { width: 20px; height: 20px; border-radius: 5px; border: 2px solid #D1D5DB; flex-shrink: 0; display: flex; align-items: center; justify-content: center; background: #fff; transition: all .2s; margin-top: 1px; }
-    .mj-check-item.checked .mj-check-box { background: #00B96B; border-color: #00B96B; }
+    .mj-check-item.checked .mj-check-box { background: #4A6FD4; border-color: #4A6FD4; }
     .mj-check-mark { display: none; color: #fff; font-size: 11px; font-weight: 700; }
     .mj-check-item.checked .mj-check-mark { display: block; }
     .mj-check-text { font-size: 12px; color: #1F2937; line-height: 1.45; }
     .mj-choice-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
-    .mj-choice-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; background: #F9FAFB; transition: border-color .2s, background .2s; user-select: none; font-size: 13px; color: #1F2937; }
-    .mj-choice-item:hover { border-color: #CCEFDF; background: #E8FAF2; }
-    .mj-choice-item.selected { border-color: #00B96B; background: #E8FAF2; font-weight: 600; }
+    .mj-choice-item { display: flex; align-items: center; gap: 10px; padding: 11px 12px; border: 1.5px solid #E5E7EB; border-radius: 8px; cursor: pointer; background: #F9FAFB; transition: border-color .2s, background .2s; user-select: none; font-size: 13px; color: #1A2B5E; }
+    .mj-choice-item:hover { border-color: #C7D5F8; background: #EEF2FF; }
+    .mj-choice-item.selected { border-color: #4A6FD4; background: #EEF2FF; font-weight: 600; }
     .mj-choice-icon { font-size: 18px; }
     .mj-choice-text { flex: 1; }
 
     /* 結果ヒーロー */
-    .mj-result-hero { background: linear-gradient(135deg,#00B96B,#009A58); border-radius: 12px; padding: 18px 16px; color: #fff; text-align: center; margin-bottom: 10px; animation: mjFadeUp .4s ease both; position: relative; overflow: hidden; }
-    .mj-result-hero::before { content:''; position:absolute; top:-30px; right:-30px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,.08); }
+    .mj-result-hero { background: linear-gradient(135deg, #FF3D8B, #C0245E); border-radius: 12px; padding: 18px 16px; color: #fff; text-align: center; margin-bottom: 10px; animation: mjFadeUp .4s ease both; position: relative; overflow: hidden; }
+    .mj-result-hero::before { content:''; position:absolute; top:-30px; right:-30px; width:90px; height:90px; border-radius:50%; background:rgba(255,255,255,.1); }
     .mj-result-emoji { font-size: 30px; margin-bottom: 6px; }
     .mj-result-title { font-size: 16px; font-weight: 700; line-height: 1.4; margin-bottom: 12px; }
     .mj-result-rows { display: flex; flex-direction: column; gap: 6px; }
-    .mj-result-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.15); border-radius: 7px; padding: 8px 12px; font-size: 12px; }
+    .mj-result-row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.18); border-radius: 7px; padding: 8px 12px; font-size: 12px; }
     .mj-result-row .rv { font-weight: 700; }
 
     /* オファー */
-    .mj-offer { background: #FFF7ED; border: 1.5px solid #FCD34D; border-radius: 8px; padding: 11px 13px; display: flex; gap: 8px; margin-bottom: 10px; font-size: 12px; color: #1F2937; line-height: 1.5; }
-    .mj-offer strong { color: #B45309; font-size: 13px; }
+    .mj-offer { background: #FFF0F6; border: 1.5px solid #FFB3D1; border-radius: 8px; padding: 11px 13px; display: flex; gap: 8px; margin-bottom: 10px; font-size: 12px; color: #1A2B5E; line-height: 1.5; }
+    .mj-offer strong { color: #C0245E; font-size: 13px; }
 
     /* CTA */
     .mj-cta-btn {
-      width: 100%; height: 52px; background: #00B96B; color: #fff;
-      border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
-      cursor: pointer; transition: background .2s, transform .1s;
+      width: 100%; height: 52px;
+      background: linear-gradient(135deg, #FF3D8B, #E0256F);
+      color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
+      cursor: pointer; transition: opacity .2s, transform .1s;
       display: flex; align-items: center; justify-content: center; gap: 6px;
-      margin-bottom: 6px;
+      margin-bottom: 6px; box-shadow: 0 4px 16px rgba(255,61,139,.35);
     }
-    .mj-cta-btn:hover { background: #009A58; }
+    .mj-cta-btn:hover { opacity: .9; }
     .mj-cta-sub { font-size: 11px; color: #9CA3AF; text-align: center; margin-bottom: 10px; }
     .mj-disclaimer { font-size: 9px; color: #9CA3AF; text-align: center; line-height: 1.7; }
 
     /* 安心訴求 */
     .mj-trust { display: flex; justify-content: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
     .mj-trust-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: #9CA3AF; }
-
-    @media (max-width: 400px) {
-      #mj-panel { width: calc(100vw - 16px); right: 8px; bottom: 80px; }
-      #mj-trigger { right: 8px; bottom: 16px; }
-      #mj-bubble { right: 8px; }
-    }
   `;
   document.head.appendChild(style);
 
@@ -178,6 +206,9 @@
   const wrap = document.createElement('div');
   wrap.id = 'mj-bot-wrap';
   wrap.innerHTML = `
+    <!-- オーバーレイ -->
+    <div id="mj-overlay" onclick="mjToggle()"></div>
+
     <!-- 吹き出し -->
     <div id="mj-bubble">
       あなたはマンジャロの対象かも？<br>
@@ -197,6 +228,7 @@
         <div class="mj-h-logo">MOUNJARO ONLINE</div>
         <div class="mj-h-title">あなたはマンジャロの対象かも？</div>
         <div class="mj-h-sub">30秒で確認できます 👇</div>
+        <button class="mj-h-close" onclick="mjToggle()">✕</button>
       </div>
       <div id="mj-panel-body">
 
@@ -327,20 +359,25 @@
     mjOpen = !mjOpen;
     const panel = document.getElementById('mj-panel');
     const bubble = document.getElementById('mj-bubble');
+    const overlay = document.getElementById('mj-overlay');
     const icon = document.querySelector('#mj-trigger .mj-icon');
     const closeX = document.getElementById('mj-close-x');
     const triggerText = document.getElementById('mj-trigger-text');
     if (mjOpen) {
       panel.classList.add('show');
+      overlay.classList.add('show');
       bubble.classList.remove('show');
       icon.style.display = 'none';
       closeX.style.display = 'block';
       triggerText.textContent = '閉じる';
+      document.body.style.overflow = 'hidden';
     } else {
       panel.classList.remove('show');
+      overlay.classList.remove('show');
       icon.style.display = 'block';
       closeX.style.display = 'none';
       triggerText.textContent = '対象か確認する';
+      document.body.style.overflow = '';
     }
   };
 
